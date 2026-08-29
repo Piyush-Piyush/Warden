@@ -23,7 +23,21 @@ export interface TrueForgeClientOptions {
   baseUrl: string;
 }
 
-export class TrueForgeClient {
+// What SessionRunner actually depends on — lets tests substitute a fake
+// client without needing an interface-free duck-typed object to satisfy a
+// class with private fields.
+export interface TrueForgeClientLike {
+  createSession(agentName: string): Promise<string>;
+  streamTurn(sessionId: string, input: unknown[]): AsyncGenerator<TurnStreamEvent>;
+  resumeWithApproval(
+    sessionId: string,
+    threadId: string,
+    toolCallId: string,
+    decision: { status: "allow" } | { status: "deny"; reason?: string },
+  ): Promise<AsyncGenerator<TurnStreamEvent>>;
+}
+
+export class TrueForgeClient implements TrueForgeClientLike {
   private readonly baseUrl: string;
 
   constructor(options: TrueForgeClientOptions) {

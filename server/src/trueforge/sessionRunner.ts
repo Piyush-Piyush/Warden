@@ -1,15 +1,13 @@
 import type Database from "better-sqlite3";
 import {
   decideApproval,
-  getLatestPendingApprovalForCase,
   getPendingApproval,
   insertCaseEvent,
   insertPendingApproval,
   resolveCase,
-  setCaseRootCause,
   updateCaseStatus,
 } from "../caseStore/queries.js";
-import { TrueForgeClient, type TurnStreamEvent } from "./client.js";
+import { TrueForgeClient, type TrueForgeClientLike, type TurnStreamEvent } from "./client.js";
 
 const CASE_EVENT_PATTERN = /<<CASE_EVENT>>(\{.*?\})<<\/CASE_EVENT>>/gs;
 
@@ -76,6 +74,12 @@ async function consumeStream(
   const messageText = new Map<string, string>(); // message id -> accumulated content
   const toolCalls = new ToolCallAccumulator();
   let result: RunTurnResult = { status: "unknown" };
+  // A turn that pauses for approval, or whose final message carries a
+  // "result" marker, still emits a generic turn.done afterward (the turn
+  // itself stopped — that's not the same thing as the case's outcome).
+  // Once either of those has set a conclusive result, turn.done's generic
+  // status must not overwrite it.
+  let conclusive = false;
 
   for await (const evt of events) {
     if (evt.type === "model.message.delta") {
@@ -93,6 +97,17 @@ async function consumeStream(
         if (text) {
           for (const parsed of extractCaseEvents(text)) {
             insertCaseEvent(db, { case_id: caseId, phase: parsed.phase, summary: parsed.summary });
+            // The agent's own "result" marker is its completion signal.
+            // Simplification worth knowing about: the marker schema is just
+            // {phase, summary} with no explicit success/failure field, so an
+            // unrecovered-but-reported verification also lands here as
+            // "resolved" rather than "failed" — a real limitation, not a bug,
+            // see docs/development-workflow.md.
+            if (parsed.phase === "result") {
+              resolveCase(db, caseId, "resolved");
+              result = { status: "resolved" };
+              conclusive = true;
+            }
           }
         }
       }
@@ -113,9 +128,10 @@ async function consumeStream(
       }
       updateCaseStatus(db, caseId, "awaiting_approval");
       result = { status: "awaiting_approval", approvalRequired: { threadId, toolCallId: evt.tool_calls[0].id } };
+      conclusive = true;
     }
 
-    if (evt.type === "turn.done") {
+    if (evt.type === "turn.done" && !conclusive) {
       const status = evt.state?.status ?? "unknown";
       result = { status };
     }
@@ -127,7 +143,7 @@ async function consumeStream(
 export class SessionRunner {
   constructor(
     private readonly db: Database.Database,
-    private readonly client: TrueForgeClient,
+    private readonly client: TrueForgeClientLike,
   ) {}
 
   async startInvestigation(caseId: string, sessionId: string, message: string): Promise<RunTurnResult> {
