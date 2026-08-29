@@ -3,19 +3,19 @@
   "environment": "production",
   "deploys": [
     {
-      "commit_sha": "9f01",
+      "commit_sha": "7e484d6",
       "minutes_before_incident": 240,
       "deployed_by": "ci-bot",
       "note": "baseline — unrelated to the incident"
     },
     {
-      "commit_sha": "a1b2",
+      "commit_sha": "3839bc0",
       "minutes_before_incident": 25,
       "deployed_by": "ci-bot",
       "note": "distractor — landed shortly before the incident, unrelated change"
     },
     {
-      "commit_sha": "4c21",
+      "commit_sha": "bb83296",
       "minutes_before_incident": 2,
       "deployed_by": "ci-bot",
       "note": "culprit — reduced the upstream timeout budget"

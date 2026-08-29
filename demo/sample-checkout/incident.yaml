@@ -18,9 +18,12 @@ signals:
     tool: get_logs
     query_hint: 'service=checkout-api'
   deploys:
-    mcp_server: ops-server
-    repo: local/warden-sample-checkout
+    mcp_server: github
+    tool: list_commits
+    repo: Piyush-Piyush/warden-sample-checkout
     environment: production
+    fallback_mcp_server: ops-server
+    fallback_tool: list_deploys
 
 bisect:
   enabled: true
