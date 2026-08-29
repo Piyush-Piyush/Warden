@@ -36,19 +36,21 @@ describe("bisect harness", () => {
     pythonCommand = resolvePythonCommand();
   });
 
+  // Commit shas match the real commits on github.com/Piyush-Piyush/warden-sample-checkout
+  // (see docs/development-workflow.md M7) - baseline, distractor, culprit.
   it("baseline and distractor show no timeouts", () => {
-    expect(runHarness("9f01").timeout_rate_pct).toBe(0);
-    expect(runHarness("a1b2").timeout_rate_pct).toBe(0);
+    expect(runHarness("7e484d6").timeout_rate_pct).toBe(0);
+    expect(runHarness("3839bc0").timeout_rate_pct).toBe(0);
   });
 
   it("the culprit separates from the others by a comfortable margin", () => {
-    const culprit = runHarness("4c21");
+    const culprit = runHarness("bb83296");
     expect(culprit.timeout_rate_pct).toBeGreaterThan(4);
   });
 
   it("is fully deterministic across repeated runs", () => {
-    const first = runHarness("4c21");
-    const second = runHarness("4c21");
+    const first = runHarness("bb83296");
+    const second = runHarness("bb83296");
     expect(second.timeout_rate_pct).toBe(first.timeout_rate_pct);
   });
 });

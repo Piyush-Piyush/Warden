@@ -142,9 +142,9 @@ describe("ops-mcp tool handlers", () => {
 
   describe("get_bisect_kit", () => {
     it("returns exactly the requested commit shas' files", () => {
-      const result = getBisectKitHandler({ project: PROJECT, commit_shas: ["9f01", "4c21"] });
-      expect(result.candidates.map((c) => c.commit_sha)).toEqual(["9f01", "4c21"]);
-      expect(result.candidates[0].files[0].path).toBe("candidates/9f01/service.py");
+      const result = getBisectKitHandler({ project: PROJECT, commit_shas: ["7e484d6", "bb83296"] });
+      expect(result.candidates.map((c) => c.commit_sha)).toEqual(["7e484d6", "bb83296"]);
+      expect(result.candidates[0].files[0].path).toBe("candidates/7e484d6/service.py");
       expect(result.harness.path).toBe("harness.py");
     });
   });
