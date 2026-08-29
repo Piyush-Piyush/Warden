@@ -26,7 +26,7 @@ export interface GetBisectKitOutput {
   candidates: CandidateKit[];
 }
 
-// Same computed default project dir as fixtures.ts — kept independent since
+// Same computed default project dir as fixtures.ts, kept independent since
 // this tool reads raw source files (to hand to the sandbox), not JSON
 // fixtures parsed into memory at startup.
 function resolveProjectDir(): string {

@@ -46,7 +46,7 @@ export function listDeploysHandler(
     deployed_by: d.deployed_by,
   }));
 
-  // A rollback is itself a deploy — reflect it in the timeline once it's
+  // A rollback is itself a deploy: reflect it in the timeline once it's
   // happened, so the case timeline/dashboard shows the full picture.
   if (scenario.rollback_performed_at && scenario.rolled_back_to_commit_sha) {
     deploys.push({

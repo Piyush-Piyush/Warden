@@ -77,11 +77,11 @@ function buildServer(): McpServer {
   server.registerTool(
     "rollback_deploy",
     {
-      description: "Roll back a service to a prior deploy. Irreversible from this tool's point of view — changes what's running in production.",
+      description: "Roll back a service to a prior deploy. Irreversible from this tool's point of view, changes what's running in production.",
       inputSchema: rollbackDeployInputShape,
       // destructiveHint is what makes TrueForge's default require_approval_for_tools
       // (["@write","@destructive"]) auto-gate this tool even without the explicit
-      // per-name entry agents/incident-responder.agent.json also sets — two
+      // per-name entry agents/incident-responder.agent.json also sets: two
       // independent layers agreeing, not one place that could silently drop the gate.
       annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
     },
@@ -108,7 +108,7 @@ function buildServer(): McpServer {
 }
 
 // A single McpServer/Transport pair only ever completes one `initialize`
-// handshake for its whole lifetime — reusing one pair across independent
+// handshake for its whole lifetime; reusing one pair across independent
 // client connections (e.g. a new one per TrueForge session) fails every
 // connection after the first with "Server already initialized". The fix is
 // the standard stateful-HTTP pattern: one fresh {server, transport} pair per
@@ -172,7 +172,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", active_sessions: sessions.size });
 });
 
-// Admin-only — arms or clears the incident scenario for a {project,service}.
+// Admin-only: arms or clears the incident scenario for a {project,service}.
 // Not exposed to the agent as an MCP tool: the webhook handler calls this
 // directly (server-to-server) before creating a session, so the agent can't
 // control its own test conditions. See scenarioState.ts.

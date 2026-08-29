@@ -17,7 +17,7 @@ export interface RollbackDeployOutput {
   rolled_back_at: string;
 }
 
-// Destructive — approval-gated (see mcp/ops-server/src/index.ts's
+// Destructive, approval-gated (see mcp/ops-server/src/index.ts's
 // destructiveHint annotation, and agents/incident-responder.agent.json's
 // require_approval_for_tools, derived from incident.yaml). This is the one
 // tool call in the whole flow that changes what's actually "running": it

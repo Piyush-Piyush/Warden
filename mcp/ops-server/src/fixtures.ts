@@ -45,7 +45,7 @@ export interface ProjectFixtures {
   deploys: DeploysFixture;
 }
 
-// This package's own location on disk — used to compute the default demo
+// This package's own location on disk, used to compute the default demo
 // project path so fixtures resolve correctly regardless of the process's
 // current working directory (e.g. `npm run dev -w mcp/ops-server` runs with
 // cwd set to this package, not the repo root).

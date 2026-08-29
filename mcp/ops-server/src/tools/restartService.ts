@@ -14,7 +14,7 @@ export interface RestartServiceOutput {
   restarted_at: string;
 }
 
-// Destructive — approval-gated, same as rollback_deploy. Not part of the
+// Destructive, approval-gated, same as rollback_deploy. Not part of the
 // sample-checkout incident's actual resolution path (that's a rollback), but
 // exists because incident.yaml's actions.approval_required lists it as a
 // generally available remediation for other kinds of incidents.
