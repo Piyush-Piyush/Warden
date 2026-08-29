@@ -1,0 +1,15 @@
+{
+  "service": "checkout-api",
+  "baseline_templates": [
+    { "level": "info", "message": "checkout request completed" },
+    { "level": "info", "message": "payment authorized" },
+    { "level": "info", "message": "order confirmation sent" },
+    { "level": "warn", "message": "upstream latency above p50, within budget" }
+  ],
+  "incident_error_template": {
+    "level": "error",
+    "message": "upstream timeout: payment-gateway call exceeded budget after 3 attempts"
+  },
+  "baseline_entries_per_minute": 4,
+  "incident_entries_per_minute": 9
+}

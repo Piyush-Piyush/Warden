@@ -1,0 +1,24 @@
+{
+  "service": "checkout-api",
+  "environment": "production",
+  "deploys": [
+    {
+      "commit_sha": "9f01",
+      "minutes_before_incident": 240,
+      "deployed_by": "ci-bot",
+      "note": "baseline — unrelated to the incident"
+    },
+    {
+      "commit_sha": "a1b2",
+      "minutes_before_incident": 25,
+      "deployed_by": "ci-bot",
+      "note": "distractor — landed shortly before the incident, unrelated change"
+    },
+    {
+      "commit_sha": "4c21",
+      "minutes_before_incident": 2,
+      "deployed_by": "ci-bot",
+      "note": "culprit — reduced the upstream timeout budget"
+    }
+  ]
+}

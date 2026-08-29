@@ -1,0 +1,16 @@
+{
+  "service": "checkout-api",
+  "metrics": {
+    "error_rate_pct": {
+      "unit": "percent",
+      "baseline_value": 0.3,
+      "elevated_value": 6.0
+    },
+    "p99_latency_ms": {
+      "unit": "milliseconds",
+      "baseline_value": 420,
+      "elevated_value": 1900
+    }
+  },
+  "step_seconds": 60
+}
