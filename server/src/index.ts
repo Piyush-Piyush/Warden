@@ -16,6 +16,23 @@ const runner = new SessionRunner(db, client);
 
 const app = express();
 app.use(express.json());
+
+// The dashboard is a separate origin (its own dev server / static host) —
+// without this, browsers block every fetch to this API with a CORS error
+// even though curl/server-to-server calls work fine (curl doesn't enforce
+// same-origin policy, which is why this was missed until checking the
+// dashboard specifically).
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(204);
+    return;
+  }
+  next();
+});
+
 app.use(createHealthRouter());
 app.use(createWebhookRouter(db, client, runner));
 app.use(createCasesRouter(db));
