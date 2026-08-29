@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { MetricsFixture } from "../fixtures.js";
+import { RECOVERY_DURATION_SECONDS, type ScenarioState } from "../scenarioState.js";
 
 export const getMetricsInputShape = {
   project: z.string(),
@@ -23,9 +24,27 @@ export interface GetMetricsOutput {
   points: MetricPoint[];
 }
 
-// M1 scope: flat baseline series. The elevated/decay-curve behavior driven by
-// scenarioState.incident_triggered_at is wired in at M4.
-export function getMetricsHandler(input: GetMetricsInput, fixture: MetricsFixture): GetMetricsOutput {
+function valueAt(t: number, baseline: number, elevated: number, scenario: ScenarioState): number {
+  if (!scenario.incident_triggered_at) return baseline;
+  const incidentAt = new Date(scenario.incident_triggered_at).getTime();
+  if (t < incidentAt) return baseline;
+
+  if (!scenario.rollback_performed_at) return elevated;
+  const rolledBackAt = new Date(scenario.rollback_performed_at).getTime();
+  if (t < rolledBackAt) return elevated;
+
+  const elapsedSeconds = (t - rolledBackAt) / 1000;
+  if (elapsedSeconds >= RECOVERY_DURATION_SECONDS) return baseline;
+
+  const progress = elapsedSeconds / RECOVERY_DURATION_SECONDS;
+  return elevated - (elevated - baseline) * progress;
+}
+
+export function getMetricsHandler(
+  input: GetMetricsInput,
+  fixture: MetricsFixture,
+  scenario: ScenarioState,
+): GetMetricsOutput {
   const definition = fixture.metrics[input.metric];
   if (!definition) {
     throw new Error(`unknown metric "${input.metric}"`);
@@ -37,7 +56,8 @@ export function getMetricsHandler(input: GetMetricsInput, fixture: MetricsFixtur
 
   const points: MetricPoint[] = [];
   for (let t = start; t <= end; t += stepMs) {
-    points.push({ t: new Date(t).toISOString(), value: definition.baseline_value });
+    const value = valueAt(t, definition.baseline_value, definition.elevated_value, scenario);
+    points.push({ t: new Date(t).toISOString(), value: Math.round(value * 100) / 100 });
   }
   return { unit: definition.unit, points };
 }

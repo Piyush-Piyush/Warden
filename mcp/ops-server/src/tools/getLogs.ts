@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { LogsFixture } from "../fixtures.js";
+import { RECOVERY_DURATION_SECONDS, type ScenarioState } from "../scenarioState.js";
 
 export const getLogsInputShape = {
   project: z.string(),
@@ -23,25 +24,48 @@ export interface GetLogsOutput {
   entries: LogEntry[];
 }
 
-// M1 scope: baseline traffic only, evenly spread across the window. The
-// incident error signature (fixture.incident_error_template) is wired in at
-// M4 once scenarioState exists to say whether an incident is currently armed.
-export function getLogsHandler(input: GetLogsInput, fixture: LogsFixture): GetLogsOutput {
+function isDuringIncident(t: number, scenario: ScenarioState): boolean {
+  if (!scenario.incident_triggered_at) return false;
+  const incidentAt = new Date(scenario.incident_triggered_at).getTime();
+  if (t < incidentAt) return false;
+  if (!scenario.rollback_performed_at) return true;
+  const recoveryCompleteAt =
+    new Date(scenario.rollback_performed_at).getTime() + RECOVERY_DURATION_SECONDS * 1000;
+  return t < recoveryCompleteAt;
+}
+
+export function getLogsHandler(
+  input: GetLogsInput,
+  fixture: LogsFixture,
+  scenario: ScenarioState,
+): GetLogsOutput {
   const start = new Date(input.start).getTime();
   const end = new Date(input.end).getTime();
-  const stepMs = 60_000 / fixture.baseline_entries_per_minute;
 
   const entries: LogEntry[] = [];
   let templateIndex = 0;
-  for (let t = start; t <= end; t += stepMs) {
-    const template = fixture.baseline_templates[templateIndex % fixture.baseline_templates.length];
-    entries.push({
-      timestamp: new Date(t).toISOString(),
-      level: template.level,
-      message: template.message,
-      service: input.service,
-    });
-    templateIndex++;
+  let t = start;
+  while (t <= end) {
+    const duringIncident = isDuringIncident(t, scenario);
+    if (duringIncident) {
+      entries.push({
+        timestamp: new Date(t).toISOString(),
+        level: fixture.incident_error_template.level,
+        message: fixture.incident_error_template.message,
+        service: input.service,
+      });
+      t += 60_000 / fixture.incident_entries_per_minute;
+    } else {
+      const template = fixture.baseline_templates[templateIndex % fixture.baseline_templates.length];
+      entries.push({
+        timestamp: new Date(t).toISOString(),
+        level: template.level,
+        message: template.message,
+        service: input.service,
+      });
+      templateIndex++;
+      t += 60_000 / fixture.baseline_entries_per_minute;
+    }
   }
   return { entries };
 }
