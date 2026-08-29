@@ -1,5 +1,6 @@
-# culprit — reduced the upstream timeout budget, causing real timeouts
-# under normal upstream latency variance
+# culprit (github.com/Piyush-Piyush/warden-sample-checkout@bb83296) — reduced
+# the upstream timeout budget, causing real timeouts under normal upstream
+# latency variance
 TIMEOUT_BUDGET_MS = 150
 
 

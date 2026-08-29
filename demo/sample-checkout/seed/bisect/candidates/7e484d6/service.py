@@ -1,4 +1,5 @@
-# baseline — the timeout budget before the incident-causing deploy
+# baseline (github.com/Piyush-Piyush/warden-sample-checkout@7e484d6) —
+# the timeout budget before the incident-causing deploy
 TIMEOUT_BUDGET_MS = 500
 
 
