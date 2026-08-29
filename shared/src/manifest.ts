@@ -29,9 +29,11 @@ export const ManifestV1 = z.object({
     }),
     deploys: z.object({
       mcp_server: z.string().min(1),
+      tool: z.string().min(1),
       repo: z.string().min(1),
       environment: z.string().min(1),
       fallback_mcp_server: z.string().optional(),
+      fallback_tool: z.string().optional(),
     }),
   }),
   bisect: z.object({
