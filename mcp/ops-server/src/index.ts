@@ -4,6 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { loadFixtures } from "./fixtures.js";
+import { getBisectKitHandler, getBisectKitInputShape } from "./tools/getBisectKit.js";
 import { getLogsHandler, getLogsInputShape } from "./tools/getLogs.js";
 import { getMetricsHandler, getMetricsInputShape } from "./tools/getMetrics.js";
 import { listDeploysHandler, listDeploysInputShape } from "./tools/listDeploys.js";
@@ -49,6 +50,20 @@ function buildServer(): McpServer {
     },
     async (input) => {
       const result = listDeploysHandler(input, fixtures.deploys);
+      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+    },
+  );
+
+  server.registerTool(
+    "get_bisect_kit",
+    {
+      description:
+        "Get the reproduction harness, latency fixture, and candidate source files for the given deploy commit shas, to run in a sandbox and compare their observed failure rates.",
+      inputSchema: getBisectKitInputShape,
+      annotations: { readOnlyHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const result = getBisectKitHandler(input);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     },
   );
