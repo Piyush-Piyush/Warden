@@ -4,10 +4,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import { loadFixtures } from "./fixtures.js";
+import { armIncident, getScenarioState, resetScenario } from "./scenarioState.js";
 import { getBisectKitHandler, getBisectKitInputShape } from "./tools/getBisectKit.js";
 import { getLogsHandler, getLogsInputShape } from "./tools/getLogs.js";
 import { getMetricsHandler, getMetricsInputShape } from "./tools/getMetrics.js";
 import { listDeploysHandler, listDeploysInputShape } from "./tools/listDeploys.js";
+import { restartServiceHandler, restartServiceInputShape } from "./tools/restartService.js";
+import { rollbackDeployHandler, rollbackDeployInputShape } from "./tools/rollbackDeploy.js";
 
 const PORT = Number(process.env.OPS_MCP_PORT ?? 4000);
 const fixtures = loadFixtures();
@@ -23,7 +26,8 @@ function buildServer(): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async (input) => {
-      const result = getLogsHandler(input, fixtures.logs);
+      const scenario = getScenarioState(input.project, input.service);
+      const result = getLogsHandler(input, fixtures.logs, scenario);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     },
   );
@@ -36,7 +40,8 @@ function buildServer(): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async (input) => {
-      const result = getMetricsHandler(input, fixtures.metrics);
+      const scenario = getScenarioState(input.project, input.service);
+      const result = getMetricsHandler(input, fixtures.metrics, scenario);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     },
   );
@@ -49,7 +54,8 @@ function buildServer(): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async (input) => {
-      const result = listDeploysHandler(input, fixtures.deploys);
+      const scenario = getScenarioState(input.project, input.service);
+      const result = listDeploysHandler(input, fixtures.deploys, scenario);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     },
   );
@@ -64,6 +70,36 @@ function buildServer(): McpServer {
     },
     async (input) => {
       const result = getBisectKitHandler(input);
+      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+    },
+  );
+
+  server.registerTool(
+    "rollback_deploy",
+    {
+      description: "Roll back a service to a prior deploy. Irreversible from this tool's point of view — changes what's running in production.",
+      inputSchema: rollbackDeployInputShape,
+      // destructiveHint is what makes TrueForge's default require_approval_for_tools
+      // (["@write","@destructive"]) auto-gate this tool even without the explicit
+      // per-name entry agents/incident-responder.agent.json also sets — two
+      // independent layers agreeing, not one place that could silently drop the gate.
+      annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const result = rollbackDeployHandler(input);
+      return { content: [{ type: "text", text: JSON.stringify(result) }] };
+    },
+  );
+
+  server.registerTool(
+    "restart_service",
+    {
+      description: "Restart a service. Approval-gated, same as rollback_deploy.",
+      inputSchema: restartServiceInputShape,
+      annotations: { readOnlyHint: false, destructiveHint: true, openWorldHint: false },
+    },
+    async (input) => {
+      const result = restartServiceHandler(input);
       return { content: [{ type: "text", text: JSON.stringify(result) }] };
     },
   );
@@ -134,6 +170,24 @@ app.get("/mcp", async (req, res) => {
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", active_sessions: sessions.size });
+});
+
+// Admin-only — arms or clears the incident scenario for a {project,service}.
+// Not exposed to the agent as an MCP tool: the webhook handler calls this
+// directly (server-to-server) before creating a session, so the agent can't
+// control its own test conditions. See scenarioState.ts.
+app.post("/admin/reset", (req, res) => {
+  const { project, service, incident_triggered_at } = req.body ?? {};
+  if (typeof project !== "string" || typeof service !== "string") {
+    res.status(400).json({ error: "project and service are required" });
+    return;
+  }
+  if (incident_triggered_at) {
+    armIncident(project, service, incident_triggered_at);
+  } else {
+    resetScenario(project, service);
+  }
+  res.json({ status: "ok", scenario: getScenarioState(project, service) });
 });
 
 app.listen(PORT, () => {
