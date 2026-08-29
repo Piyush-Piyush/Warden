@@ -6,19 +6,19 @@
       "commit_sha": "7e484d6",
       "minutes_before_incident": 240,
       "deployed_by": "ci-bot",
-      "note": "baseline — unrelated to the incident"
+      "note": "baseline, unrelated to the incident"
     },
     {
       "commit_sha": "3839bc0",
       "minutes_before_incident": 25,
       "deployed_by": "ci-bot",
-      "note": "distractor — landed shortly before the incident, unrelated change"
+      "note": "distractor, landed shortly before the incident, unrelated change"
     },
     {
       "commit_sha": "bb83296",
       "minutes_before_incident": 2,
       "deployed_by": "ci-bot",
-      "note": "culprit — reduced the upstream timeout budget"
+      "note": "culprit, reduced the upstream timeout budget"
     }
   ]
 }

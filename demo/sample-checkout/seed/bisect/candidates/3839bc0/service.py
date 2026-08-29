@@ -1,4 +1,4 @@
-# distractor (github.com/Piyush-Piyush/warden-sample-checkout@3839bc0) —
+# distractor (github.com/Piyush-Piyush/warden-sample-checkout@3839bc0):
 # the real commit adds a logging line here; omitted from this fixture so the
 # harness's stdout stays one clean JSON line (see docs/development-workflow.md
 # M7 for why commit metadata and bisect execution are decoupled on purpose).
