@@ -52,6 +52,7 @@ export interface CaseEvent {
 export interface PendingApproval {
   id: string;
   case_id: string;
+  thread_id: string;
   tool_name: string;
   tool_args: Record<string, unknown>;
   rationale: string | null;
