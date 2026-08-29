@@ -58,7 +58,9 @@ export function getCase(db: Database.Database, id: string): Case | undefined {
 }
 
 export function listCases(db: Database.Database): Case[] {
-  const rows = db.prepare(`SELECT * FROM cases ORDER BY created_at DESC`).all() as CaseRow[];
+  // rowid as a tiebreak: two cases created within the same millisecond would
+  // otherwise sort arbitrarily since created_at alone isn't unique.
+  const rows = db.prepare(`SELECT * FROM cases ORDER BY created_at DESC, rowid DESC`).all() as CaseRow[];
   return rows.map(rowToCase);
 }
 
@@ -181,7 +183,7 @@ export function getPendingApproval(db: Database.Database, id: string): PendingAp
 
 export function getLatestPendingApprovalForCase(db: Database.Database, caseId: string): PendingApproval | undefined {
   const row = db
-    .prepare(`SELECT * FROM pending_approvals WHERE case_id = ? AND status = 'pending' ORDER BY created_at DESC LIMIT 1`)
+    .prepare(`SELECT * FROM pending_approvals WHERE case_id = ? AND status = 'pending' ORDER BY created_at DESC, rowid DESC LIMIT 1`)
     .get(caseId) as PendingApprovalRow | undefined;
   return row ? rowToApproval(row) : undefined;
 }
