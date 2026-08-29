@@ -9,4 +9,6 @@ build/
 .DS_Store
 .vscode/
 *.tsbuildinfo
+__pycache__/
+*.pyc
 docs/
