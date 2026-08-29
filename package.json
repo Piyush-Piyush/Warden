@@ -1,0 +1,28 @@
+{
+  "name": "warden",
+  "private": true,
+  "version": "0.1.0",
+  "description": "An incident-response agent that investigates, reproduces, and proposes fixes for production alerts, and asks before acting.",
+  "workspaces": [
+    "shared",
+    "mcp/ops-server",
+    "server",
+    "dashboard"
+  ],
+  "scripts": {
+    "dev:ops-mcp": "npm run dev -w mcp/ops-server",
+    "dev:server": "npm run dev -w server",
+    "dev:dashboard": "npm run dev -w dashboard",
+    "register-agent": "tsx scripts/register-agent.ts",
+    "seed": "tsx scripts/seed.ts",
+    "send-alert": "tsx scripts/send-alert.ts",
+    "probe:trueforge": "tsx scripts/probe-trueforge.ts",
+    "test": "vitest run",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
