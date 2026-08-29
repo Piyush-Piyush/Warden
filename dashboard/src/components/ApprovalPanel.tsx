@@ -16,7 +16,7 @@ export function ApprovalPanel({ caseId, approval }: { caseId: string; approval: 
         await denyCase(caseId, "dashboard-user");
       }
       // Polling on the parent page picks up the new state within a couple
-      // of seconds — no need to refetch here.
+      // of seconds, no need to refetch here.
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);

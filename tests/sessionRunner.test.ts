@@ -10,7 +10,7 @@ import type { TrueForgeClientLike, TurnStreamEvent } from "../server/src/truefor
 import { SessionRunner } from "../server/src/trueforge/sessionRunner.js";
 
 // A turn that pauses for approval, or whose final message carries a "result"
-// marker, still emits a generic turn.done afterward — this is the exact
+// marker, still emits a generic turn.done afterward, this is the exact
 // sequence that caused a real bug (turn.done overwrote the conclusive
 // status). These tests replay that sequence deterministically, no LLM call
 // needed to catch a regression here.

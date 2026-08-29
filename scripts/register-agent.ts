@@ -3,7 +3,7 @@
 // registration time rather than baked into the checked-in template:
 //   - the model name (env-configurable, since it varies per environment)
 //   - mcp_servers[].require_approval_for_tools, derived from the target
-//     project's incident.yaml (actions.approval_required) — this is the
+//     project's incident.yaml (actions.approval_required): this is the
 //     harness-level enforcement the agent's own instructions describe but
 //     cannot themselves guarantee. See docs/development-workflow.md §7/§17.
 

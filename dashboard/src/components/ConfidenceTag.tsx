@@ -7,7 +7,7 @@ const COLORS: Record<Confidence, string> = {
 };
 
 export function ConfidenceTag({ confidence }: { confidence: Confidence | null }) {
-  if (!confidence) return <span style={{ color: "#999" }}>—</span>;
+  if (!confidence) return <span style={{ color: "#999" }}>-</span>;
   return (
     <span style={{ color: COLORS[confidence], fontWeight: 600, textTransform: "uppercase", fontSize: 12 }}>
       {confidence}

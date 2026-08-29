@@ -20,14 +20,14 @@ function main() {
 
   const manifestText = readFileSync(join(PROJECT_DIR, "incident.yaml"), "utf8");
   const manifest = parseManifestYaml(manifestText);
-  console.log(`  incident.yaml OK — project "${manifest.project}", ${manifest.services.length} service(s)`);
+  console.log(`  incident.yaml OK: project "${manifest.project}", ${manifest.services.length} service(s)`);
 
   const logs = readJson<LogsFixture>("logs.json");
   const metrics = readJson<MetricsFixture>("metrics.json");
   const deploys = readJson<DeploysFixture>("deploys.json");
-  console.log(`  logs.json OK — ${logs.baseline_templates.length} baseline template(s)`);
-  console.log(`  metrics.json OK — metrics: ${Object.keys(metrics.metrics).join(", ")}`);
-  console.log(`  deploys.json OK — ${deploys.deploys.length} deploy(s)`);
+  console.log(`  logs.json OK: ${logs.baseline_templates.length} baseline template(s)`);
+  console.log(`  metrics.json OK, metrics: ${Object.keys(metrics.metrics).join(", ")}`);
+  console.log(`  deploys.json OK: ${deploys.deploys.length} deploy(s)`);
 
   const defaultMetric = manifest.signals.metrics.default_metric;
   if (!(defaultMetric in metrics.metrics)) {

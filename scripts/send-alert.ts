@@ -1,4 +1,4 @@
-// Dev helper: posts a synthetic alert to the webhook. Generic — takes a
+// Dev helper: posts a synthetic alert to the webhook. Generic, takes a
 // project/service as CLI args, defaults to the demo project.
 // Usage: npx tsx scripts/send-alert.ts [project] [service]
 
