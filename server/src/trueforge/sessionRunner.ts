@@ -23,7 +23,7 @@ function extractCaseEvents(text: string): ParsedCaseEvent[] {
       const parsed = JSON.parse(match[1]) as ParsedCaseEvent;
       if (parsed.phase && parsed.summary) found.push(parsed);
     } catch {
-      // malformed marker — skip rather than crash the whole turn
+      // malformed marker, skip rather than crash the whole turn
     }
   }
   return found;
@@ -53,7 +53,7 @@ class ToolCallAccumulator {
       try {
         args = entry.argsText ? (JSON.parse(entry.argsText) as Record<string, unknown>) : {};
       } catch {
-        // arguments didn't finish streaming or weren't valid JSON — leave empty
+        // arguments didn't finish streaming or weren't valid JSON, leave empty
       }
       result.set(entry.id, { name: entry.name, args });
     }
@@ -76,7 +76,7 @@ async function consumeStream(
   let result: RunTurnResult = { status: "unknown" };
   // A turn that pauses for approval, or whose final message carries a
   // "result" marker, still emits a generic turn.done afterward (the turn
-  // itself stopped — that's not the same thing as the case's outcome).
+  // itself stopped; that's not the same thing as the case's outcome).
   // Once either of those has set a conclusive result, turn.done's generic
   // status must not overwrite it.
   let conclusive = false;
@@ -101,7 +101,7 @@ async function consumeStream(
             // Simplification worth knowing about: the marker schema is just
             // {phase, summary} with no explicit success/failure field, so an
             // unrecovered-but-reported verification also lands here as
-            // "resolved" rather than "failed" — a real limitation, not a bug,
+            // "resolved" rather than "failed", a real limitation, not a bug,
             // see docs/development-workflow.md.
             if (parsed.phase === "result") {
               resolveCase(db, caseId, "resolved");
@@ -157,7 +157,7 @@ export class SessionRunner {
 
   // decision.status here is TrueForge's vocabulary ("allow"/"deny"); the
   // case-store's own vocabulary is "approved"/"denied" (matches pending_approvals'
-  // CHECK constraint) — both map 1:1, kept distinct because they're genuinely
+  // CHECK constraint); both map 1:1, kept distinct because they're genuinely
   // two different schemas agreeing, not the same value passed through twice.
   async resumeApproval(
     caseId: string,

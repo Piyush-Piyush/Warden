@@ -42,7 +42,7 @@ export function createWebhookRouter(db: Database.Database, client: TrueForgeClie
     const { rawYaml } = manifestResult;
 
     // Arm the incident scenario in ops-mcp so get_logs/get_metrics/list_deploys
-    // reflect this alert. Server-to-server call — never something the agent
+    // reflect this alert. Server-to-server call, never something the agent
     // itself can trigger.
     await fetch(`${OPS_MCP_ADMIN_URL}/admin/reset`, {
       method: "POST",
@@ -68,7 +68,7 @@ export function createWebhookRouter(db: Database.Database, client: TrueForgeClie
 
     res.status(202).json({ case_id: caseId, session_id: sessionId, status: "accepted" });
 
-    // Fire and forget — the HTTP response above doesn't wait for the
+    // Fire and forget: the HTTP response above doesn't wait for the
     // investigation. SessionRunner drives case-store updates as the agent's
     // turn stream progresses.
     const message = `A production alert just fired:\n\n${JSON.stringify(alert, null, 2)}\n\nHere is the project manifest for this service:\n\n${rawYaml}\n\nInvestigate.`;

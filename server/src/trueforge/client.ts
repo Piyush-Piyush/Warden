@@ -1,5 +1,5 @@
 // Thin wrapper over TrueForge's HTTP API, using the shapes confirmed live
-// against a running server (docs/development-workflow.md §14a) — not the
+// against a running server (docs/development-workflow.md §14a), not the
 // low-level trueforge-core library, which is an embeddable orchestration
 // runtime, not a client for talking to an already-running TrueForge server.
 
@@ -23,7 +23,7 @@ export interface TrueForgeClientOptions {
   baseUrl: string;
 }
 
-// What SessionRunner actually depends on — lets tests substitute a fake
+// What SessionRunner actually depends on, lets tests substitute a fake
 // client without needing an interface-free duck-typed object to satisfy a
 // class with private fields.
 export interface TrueForgeClientLike {
@@ -56,7 +56,7 @@ export class TrueForgeClient implements TrueForgeClientLike {
   }
 
   // Sends a turn and yields every SSE event as it arrives. Caller drives
-  // what happens per event (case-store writes, approval detection, etc.) —
+  // what happens per event (case-store writes, approval detection, etc.);
   // this function only knows how to talk to TrueForge.
   async *streamTurn(sessionId: string, input: unknown[]): AsyncGenerator<TurnStreamEvent> {
     const res = await fetch(`${this.baseUrl}/api/v1/sessions/${sessionId}/turns`, {
@@ -88,7 +88,7 @@ export class TrueForgeClient implements TrueForgeClientLike {
         try {
           yield JSON.parse(dataLine) as TurnStreamEvent;
         } catch {
-          // non-JSON SSE line (e.g. a comment/keepalive) — ignore
+          // non-JSON SSE line (e.g. a comment/keepalive), ignore
         }
       }
     }

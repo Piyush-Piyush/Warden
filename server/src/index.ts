@@ -17,8 +17,8 @@ const runner = new SessionRunner(db, client);
 const app = express();
 app.use(express.json());
 
-// The dashboard is a separate origin (its own dev server / static host) —
-// without this, browsers block every fetch to this API with a CORS error
+// The dashboard is a separate origin (its own dev server / static host).
+// Without this, browsers block every fetch to this API with a CORS error
 // even though curl/server-to-server calls work fine (curl doesn't enforce
 // same-origin policy, which is why this was missed until checking the
 // dashboard specifically).
