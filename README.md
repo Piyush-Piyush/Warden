@@ -12,6 +12,8 @@ A chatbot can describe how to debug an incident. Warden does the investigation: 
 
 Warden runs on [TrueForge](https://github.com/truefoundry/trueforge), an open-source agent harness. TrueForge is what turns the underlying model into something that can act: it runs the agent loop, connects to real tools over MCP, provisions an isolated sandbox on demand, spawns and coordinates subagents, and enforces the human-approval pause before a destructive tool call, all before any of this project's own code runs. Warden's own code is deliberately small: a domain-specific MCP server, a project manifest format, the agent's instructions, and a thin server that turns a webhook alert into a tracked case.
 
+![Warden architecture](Warden_Architecture.png)
+
 ```
 demo alert  →  server/  →  TrueForge (agent loop, subagents, sandbox, approval)
                               │
