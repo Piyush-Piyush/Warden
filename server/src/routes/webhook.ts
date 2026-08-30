@@ -7,11 +7,11 @@ import { loadProjectManifest } from "../config/manifest.js";
 import type { TrueForgeClient } from "../trueforge/client.js";
 import type { SessionRunner } from "../trueforge/sessionRunner.js";
 
-const AlertSchema = z.object({
+export const AlertSchema = z.object({
   project: z.string(),
   service: z.string(),
   alert_name: z.string().optional(),
-  severity: z.string().optional(),
+  severity: z.enum(["critical", "warning", "info"]).optional(),
   metric: z.string(),
   observed_value: z.number(),
   threshold: z.number(),
