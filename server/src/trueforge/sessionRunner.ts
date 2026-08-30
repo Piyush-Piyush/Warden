@@ -1,19 +1,23 @@
 import type Database from "better-sqlite3";
+import type { Confidence } from "@warden/shared";
 import {
   decideApproval,
   getPendingApproval,
   insertCaseEvent,
   insertPendingApproval,
   resolveCase,
+  setCaseRootCause,
   updateCaseStatus,
 } from "../caseStore/queries.js";
 import { TrueForgeClient, type TrueForgeClientLike, type TurnStreamEvent } from "./client.js";
 
 const CASE_EVENT_PATTERN = /<<CASE_EVENT>>(\{.*?\})<<\/CASE_EVENT>>/gs;
+const VALID_CONFIDENCE: Confidence[] = ["low", "medium", "high"];
 
 interface ParsedCaseEvent {
   phase: "goal" | "investigation" | "evidence" | "proposed_action" | "approval" | "result";
   summary: string;
+  confidence?: Confidence;
 }
 
 function extractCaseEvents(text: string): ParsedCaseEvent[] {
@@ -97,6 +101,13 @@ async function consumeStream(
         if (text) {
           for (const parsed of extractCaseEvents(text)) {
             insertCaseEvent(db, { case_id: caseId, phase: parsed.phase, summary: parsed.summary });
+            if (parsed.phase === "proposed_action" && VALID_CONFIDENCE.includes(parsed.confidence as Confidence)) {
+              setCaseRootCause(db, caseId, {
+                root_cause_summary: parsed.summary,
+                confidence: parsed.confidence as Confidence,
+                proposed_action: null,
+              });
+            }
             // The agent's own "result" marker is its completion signal.
             // Simplification worth knowing about: the marker schema is just
             // {phase, summary} with no explicit success/failure field, so an
