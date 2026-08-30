@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import type { CaseEvent, CaseEventPhase } from "@warden/shared";
 
 const PHASE_LABELS: Record<CaseEventPhase, string> = {
@@ -10,28 +11,42 @@ const PHASE_LABELS: Record<CaseEventPhase, string> = {
 };
 
 const PHASE_COLORS: Record<CaseEventPhase, string> = {
-  goal: "#8b8b8b",
-  investigation: "#5b7bd5",
-  evidence: "#5b7bd5",
-  proposed_action: "#d59b2b",
-  approval: "#d59b2b",
-  result: "#3a9f5c",
+  goal: "var(--ink-muted)",
+  investigation: "var(--progress-blue)",
+  evidence: "var(--progress-blue)",
+  proposed_action: "var(--status-warning)",
+  approval: "var(--status-warning)",
+  result: "var(--status-good)",
+};
+
+const PHASE_ICON: Record<CaseEventPhase, string> = {
+  goal: "⚑",
+  investigation: "◎",
+  evidence: "✓",
+  proposed_action: "→",
+  approval: "!",
+  result: "✓",
 };
 
 export function CaseTimeline({ events }: { events: CaseEvent[] }) {
   if (events.length === 0) {
-    return <p style={{ color: "#999" }}>No events yet.</p>;
+    return <p className="wd-empty">No events yet. The agent's first update will appear here.</p>;
   }
 
   return (
-    <ol style={{ listStyle: "none", padding: 0, margin: 0, borderLeft: "2px solid #e5e5e5" }}>
-      {events.map((event) => (
-        <li key={event.id} style={{ padding: "8px 0 8px 16px", marginLeft: -1, borderLeft: `3px solid ${PHASE_COLORS[event.phase]}` }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: PHASE_COLORS[event.phase], textTransform: "uppercase" }}>
-            {PHASE_LABELS[event.phase]}
+    <ol className="wd-timeline">
+      {events.map((event, i) => (
+        <li
+          key={event.id}
+          className={`wd-timeline__item${i === events.length - 1 ? " wd-timeline__item--latest" : ""}`}
+          style={{ "--badge-color": PHASE_COLORS[event.phase], animationDelay: `${Math.min(i, 6) * 40}ms` } as CSSProperties}
+        >
+          <span className="wd-timeline__node">{PHASE_ICON[event.phase]}</span>
+          <div className="wd-timeline__body">
+            <div className="wd-timeline__phase">{PHASE_LABELS[event.phase]}</div>
+            <div className="wd-timeline__summary">{event.summary}</div>
+            <div className="wd-timeline__time">{new Date(event.created_at).toLocaleString()}</div>
           </div>
-          <div style={{ fontSize: 15 }}>{event.summary}</div>
-          <div style={{ fontSize: 12, color: "#999" }}>{new Date(event.created_at).toLocaleString()}</div>
         </li>
       ))}
     </ol>

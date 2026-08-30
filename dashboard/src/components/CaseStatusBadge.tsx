@@ -1,13 +1,27 @@
+import type { CSSProperties } from "react";
 import type { CaseStatus } from "@warden/shared";
 
+// Terminal/attention states use the reserved status palette; the three
+// "agent is actively working" states share one progress color and pulse,
+// since they're stages of one flow, not distinct categories.
 const COLORS: Record<CaseStatus, string> = {
-  investigating: "#5b7bd5",
-  awaiting_approval: "#d59b2b",
-  executing: "#d59b2b",
-  verifying: "#5b7bd5",
-  resolved: "#3a9f5c",
-  failed: "#c0392b",
-  denied: "#8b8b8b",
+  investigating: "var(--progress-blue)",
+  executing: "var(--progress-blue)",
+  verifying: "var(--progress-blue)",
+  awaiting_approval: "var(--status-warning)",
+  resolved: "var(--status-good)",
+  failed: "var(--status-critical)",
+  denied: "var(--ink-muted)",
+};
+
+const LIVE: Record<CaseStatus, boolean> = {
+  investigating: true,
+  executing: true,
+  verifying: true,
+  awaiting_approval: true,
+  resolved: false,
+  failed: false,
+  denied: false,
 };
 
 const LABELS: Record<CaseStatus, string> = {
@@ -22,17 +36,8 @@ const LABELS: Record<CaseStatus, string> = {
 
 export function CaseStatusBadge({ status }: { status: CaseStatus }) {
   return (
-    <span
-      style={{
-        display: "inline-block",
-        padding: "2px 10px",
-        borderRadius: 12,
-        fontSize: 13,
-        fontWeight: 600,
-        color: "white",
-        backgroundColor: COLORS[status],
-      }}
-    >
+    <span className="wd-badge" style={{ "--badge-color": COLORS[status] } as CSSProperties}>
+      <span className={`wd-badge__dot${LIVE[status] ? " wd-badge__dot--pulse" : ""}`} />
       {LABELS[status]}
     </span>
   );

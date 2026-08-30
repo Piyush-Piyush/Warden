@@ -2,12 +2,17 @@ import { useState } from "react";
 import type { PendingApproval } from "@warden/shared";
 import { approveCase, denyCase } from "../api";
 
+function formatValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  return JSON.stringify(value);
+}
+
 export function ApprovalPanel({ caseId, approval }: { caseId: string; approval: PendingApproval }) {
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<"approve" | "deny" | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handle(action: "approve" | "deny") {
-    setBusy(true);
+    setBusy(action);
     setError(null);
     try {
       if (action === "approve") {
@@ -19,26 +24,40 @@ export function ApprovalPanel({ caseId, approval }: { caseId: string; approval: 
       // of seconds, no need to refetch here.
     } catch (err) {
       setError((err as Error).message);
-      setBusy(false);
+      setBusy(null);
     }
   }
 
+  const argEntries = Object.entries(approval.tool_args);
+
   return (
-    <div style={{ border: "1px solid #d59b2b", borderRadius: 8, padding: 16, background: "#fff8ea" }}>
-      <div style={{ fontWeight: 700, marginBottom: 8 }}>Approval needed</div>
-      <div style={{ marginBottom: 4 }}>
+    <div className="wd-approval">
+      <div className="wd-approval__head">
+        <span>⚠</span> Approval needed before this runs
+      </div>
+      <div className="wd-approval__lede">
+        The agent wants to take an action it cannot undo on its own. Nothing happens until you decide.
+      </div>
+      <div className="wd-approval__tool">
         Tool: <code>{approval.tool_name}</code>
       </div>
-      <pre style={{ background: "#fff", padding: 8, borderRadius: 4, fontSize: 13, overflowX: "auto" }}>
-        {JSON.stringify(approval.tool_args, null, 2)}
-      </pre>
-      {error && <div style={{ color: "#c0392b", marginBottom: 8 }}>{error}</div>}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button onClick={() => handle("approve")} disabled={busy} style={{ background: "#3a9f5c", color: "white", border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer" }}>
-          Approve
+      {argEntries.length > 0 && (
+        <div className="wd-kv">
+          {argEntries.map(([key, value]) => (
+            <div className="wd-kv__row" key={key}>
+              <div className="wd-kv__key">{key}</div>
+              <div className="wd-kv__val">{formatValue(value)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      {error && <div className="wd-approval__error">{error}</div>}
+      <div className="wd-approval__actions">
+        <button className="wd-btn wd-btn--approve" onClick={() => handle("approve")} disabled={busy !== null}>
+          {busy === "approve" ? "Approving…" : "Approve"}
         </button>
-        <button onClick={() => handle("deny")} disabled={busy} style={{ background: "#c0392b", color: "white", border: "none", borderRadius: 4, padding: "8px 16px", cursor: "pointer" }}>
-          Deny
+        <button className="wd-btn wd-btn--deny" onClick={() => handle("deny")} disabled={busy !== null}>
+          {busy === "deny" ? "Denying…" : "Deny"}
         </button>
       </div>
     </div>

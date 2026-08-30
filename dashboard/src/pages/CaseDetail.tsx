@@ -13,42 +13,47 @@ export function CaseDetail() {
   const { data: theCase, error } = usePolling(() => getCase(id as string), 2500, [id]);
 
   return (
-    <div style={{ maxWidth: 900, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
-      <Link to="/cases">&larr; All cases</Link>
+    <div className="wd-page">
+      <Link to="/cases" className="wd-back">
+        &larr; All cases
+      </Link>
 
-      {error && <p style={{ color: "#c0392b" }}>Failed to load case: {error.message}</p>}
-      {!theCase && !error && <p>Loading…</p>}
+      {error && <p className="wd-error">Failed to load case: {error.message}</p>}
+      {!theCase && !error && <div className="wd-skeleton" />}
 
       {theCase && (
         <>
-          <h1 style={{ marginBottom: 4 }}>
-            {theCase.service} <CaseStatusBadge status={theCase.status} />
-          </h1>
-          <p style={{ color: "#666" }}>
-            {theCase.project} · Confidence: <ConfidenceTag confidence={theCase.confidence} /> · Created{" "}
-            {new Date(theCase.created_at).toLocaleString()}
-          </p>
+          <div className="wd-title-row">
+            <h1>{theCase.service}</h1>
+            <CaseStatusBadge status={theCase.status} />
+          </div>
+          <div className="wd-meta">
+            <span>{theCase.project}</span>
+            <span className="wd-meta__sep">·</span>
+            <ConfidenceTag confidence={theCase.confidence} />
+            <span className="wd-meta__sep">·</span>
+            <span>Created {new Date(theCase.created_at).toLocaleString()}</span>
+          </div>
 
           {theCase.root_cause_summary && (
-            <p>
+            <div className="wd-root-cause wd-glass">
               <strong>Root cause:</strong> {theCase.root_cause_summary}
-            </p>
-          )}
-
-          {theCase.pending_approval && (
-            <div style={{ marginBottom: 24 }}>
-              <ApprovalPanel caseId={theCase.id} approval={theCase.pending_approval} />
             </div>
           )}
 
-          <h2>Timeline</h2>
+          {theCase.pending_approval && <ApprovalPanel caseId={theCase.id} approval={theCase.pending_approval} />}
+
+          <div className="wd-section-title">Timeline</div>
           <CaseTimeline events={theCase.events} />
 
-          <p style={{ marginTop: 24, fontSize: 13 }}>
-            <a href={`${TRUEFORGE_BASE_URL}/sessions/${theCase.trueforge_session_id}`} target="_blank" rel="noreferrer">
-              View full transcript in TrueForge &rarr;
-            </a>
-          </p>
+          <a
+            className="wd-transcript-link"
+            href={`${TRUEFORGE_BASE_URL}/sessions/${theCase.trueforge_session_id}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            View full transcript in TrueForge &rarr;
+          </a>
         </>
       )}
     </div>
