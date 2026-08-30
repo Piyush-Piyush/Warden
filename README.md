@@ -131,7 +131,11 @@ docker run --rm warden-server sh -c "cd /app && npx vitest run"
 
 ## Code review
 
-Every pull request against this repo goes through [Qodo Merge](https://www.qodo.ai/products/qodo-merge/), installed as a GitHub App on this repo. Its review focus is scoped in `.pr_agent.toml` to this project's actual invariant: flag anything that weakens the approval gate around `rollback_deploy` / `restart_service`, or that touches `sessionRunner.ts`, `mcp/ops-server`, or the manifest schema without a matching test. See [#2](https://github.com/Piyush-Piyush/Warden/pull/2) for an example. To enable it on a fork, sign in at Qodo and install the GitHub App on your own copy of the repo.
+Every pull request against this repo goes through [Qodo Merge](https://www.qodo.ai/products/qodo-merge/), installed as a GitHub App on this repo. Its review focus is scoped in `.pr_agent.toml` to this project's actual invariant: flag anything that weakens the approval gate around `rollback_deploy` / `restart_service`, or that touches `sessionRunner.ts`, `mcp/ops-server`, or the manifest schema without a matching test. To enable it on a fork, sign in at Qodo and install the GitHub App on your own copy of the repo.
+
+### Qodo Code Review Evidence
+
+[PR #3](https://github.com/Piyush-Piyush/Warden/pull/3) is a representative merged example: it restricts the webhook's `severity` field to a fixed set of known values instead of accepting any string, and adds test coverage for both the accepted and rejected cases. Qodo reviewed it automatically and reported zero bugs, zero rule violations, and zero requirement gaps. Its written assessment also weighed whether the severity set should live in a shared constant or type instead of being local to the schema, and concluded a schema-level enum was the right call until a second component actually needs that same value set, which matches the reasoning behind the change. There was no defect to fix or dismiss on this PR; the review passed clean, and it was merged as reviewed.
 
 ## Adding a real project
 
