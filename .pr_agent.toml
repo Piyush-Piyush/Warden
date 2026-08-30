@@ -1,0 +1,6 @@
+[pr_reviewer]
+num_code_suggestions = 4
+extra_instructions = "This project pauses for human approval before any destructive tool call (rollback_deploy, restart_service), enforced both by MCP tool annotations and by agents/incident-responder.agent.json's require_approval_for_tools. Flag anything that weakens that gate, and flag any change to server/src/trueforge/sessionRunner.ts, mcp/ops-server, or shared/src/manifest.ts that removes test coverage without a deterministic replacement."
+
+[pr_description]
+publish_labels = false

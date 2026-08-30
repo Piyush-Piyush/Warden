@@ -111,6 +111,10 @@ docker build -f server/Dockerfile -t warden-server .
 docker run --rm warden-server sh -c "cd /app && npx vitest run"
 ```
 
+## Code review
+
+Every pull request against this repo gets an automated review from [Qodo Merge](https://github.com/qodo-ai/pr-agent), configured in `.github/workflows/qodo-merge.yml` and `.pr_agent.toml`. It's scoped to this project's actual invariant: it's told to flag anything that weakens the approval gate around `rollback_deploy` / `restart_service`, or that touches `sessionRunner.ts`, `mcp/ops-server`, or the manifest schema without a matching test. To enable it on a fork, add an `OPENAI_KEY` secret in the repo's Actions settings; `GITHUB_TOKEN` is provided automatically.
+
 ## Adding a real project
 
 Warden isn't tied to `sample-checkout`. To point it at a real service:
