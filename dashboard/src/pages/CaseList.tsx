@@ -1,46 +1,55 @@
 import { Link } from "react-router-dom";
-import { listCases } from "../api";
+import { listCases, listConnectedProjects } from "../api";
 import { CaseStatusBadge } from "../components/CaseStatusBadge";
 import { ConfidenceTag } from "../components/ConfidenceTag";
+import { ProjectTerminal } from "../components/ProjectTerminal";
 import { usePolling } from "../usePolling";
 
 export function CaseList() {
   const { data: cases, error } = usePolling(listCases, 2500);
+  const { data: projects } = usePolling(listConnectedProjects, 15000);
 
   return (
-    <div style={{ maxWidth: 900, margin: "40px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Cases</h1>
-      {error && <p style={{ color: "#c0392b" }}>Failed to load cases: {error.message}</p>}
-      {!cases && !error && <p>Loading…</p>}
-      {cases && cases.length === 0 && <p style={{ color: "#999" }}>No cases yet. Send an alert to create one.</p>}
+    <div className="wd-page">
+      {projects && projects.length > 0 && (
+        <>
+          <div className="wd-section-title">Connected projects</div>
+          {projects.map((manifest) => (
+            <ProjectTerminal manifest={manifest} key={manifest.project} />
+          ))}
+        </>
+      )}
+
+      <h1 style={{ fontSize: 22, margin: "24px 0 20px" }}>Cases</h1>
+
+      {error && <p className="wd-error">Failed to load cases: {error.message}</p>}
+
+      {!cases && !error && (
+        <div>
+          <div className="wd-skeleton" />
+          <div className="wd-skeleton" />
+          <div className="wd-skeleton" />
+        </div>
+      )}
+
+      {cases && cases.length === 0 && (
+        <p className="wd-empty">No cases yet. Trigger an alert against the webhook to create one.</p>
+      )}
+
       {cases && cases.length > 0 && (
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ textAlign: "left", borderBottom: "2px solid #e5e5e5" }}>
-              <th style={{ padding: "8px 4px" }}>Service</th>
-              <th style={{ padding: "8px 4px" }}>Status</th>
-              <th style={{ padding: "8px 4px" }}>Confidence</th>
-              <th style={{ padding: "8px 4px" }}>Created</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cases.map((c) => (
-              <tr key={c.id} style={{ borderBottom: "1px solid #f0f0f0" }}>
-                <td style={{ padding: "8px 4px" }}>
-                  <Link to={`/cases/${c.id}`}>{c.service}</Link>
-                  <div style={{ fontSize: 12, color: "#999" }}>{c.project}</div>
-                </td>
-                <td style={{ padding: "8px 4px" }}>
-                  <CaseStatusBadge status={c.status} />
-                </td>
-                <td style={{ padding: "8px 4px" }}>
-                  <ConfidenceTag confidence={c.confidence} />
-                </td>
-                <td style={{ padding: "8px 4px", fontSize: 13, color: "#666" }}>{new Date(c.created_at).toLocaleString()}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="wd-list">
+          {cases.map((c) => (
+            <Link to={`/cases/${c.id}`} key={c.id} className="wd-list-row wd-glass" style={{ color: "inherit" }}>
+              <div>
+                <div className="wd-list-row__service">{c.service}</div>
+                <div className="wd-list-row__project">{c.project}</div>
+              </div>
+              <ConfidenceTag confidence={c.confidence} />
+              <CaseStatusBadge status={c.status} />
+              <div className="wd-list-row__time">{new Date(c.created_at).toLocaleString()}</div>
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   );

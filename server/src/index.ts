@@ -3,6 +3,7 @@ import { openDb } from "./caseStore/db.js";
 import { createApprovalsRouter } from "./routes/approvals.js";
 import { createCasesRouter } from "./routes/cases.js";
 import { createHealthRouter } from "./routes/health.js";
+import { createProjectsRouter } from "./routes/projects.js";
 import { createWebhookRouter } from "./routes/webhook.js";
 import { TrueForgeClient } from "./trueforge/client.js";
 import { SessionRunner } from "./trueforge/sessionRunner.js";
@@ -37,6 +38,7 @@ app.use(createHealthRouter());
 app.use(createWebhookRouter(db, client, runner));
 app.use(createCasesRouter(db));
 app.use(createApprovalsRouter(db, runner));
+app.use(createProjectsRouter());
 
 app.listen(PORT, () => {
   console.log(`warden server listening on http://localhost:${PORT}`);

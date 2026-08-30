@@ -1,4 +1,4 @@
-import type { Case, CaseEvent, PendingApproval } from "@warden/shared";
+import type { Case, CaseEvent, Manifest, PendingApproval } from "@warden/shared";
 
 const SERVER_BASE_URL = import.meta.env.VITE_SERVER_BASE_URL ?? "http://localhost:4100";
 
@@ -27,6 +27,10 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 
 export function listCases(): Promise<Case[]> {
   return getJson<Case[]>("/api/cases");
+}
+
+export function listConnectedProjects(): Promise<Manifest[]> {
+  return getJson<Manifest[]>("/api/projects");
 }
 
 export function getCase(id: string): Promise<CaseDetail> {
