@@ -107,4 +107,38 @@ describe("SessionRunner.consumeStream (via startInvestigation)", () => {
     expect(result.status).toBe("done");
     expect(getCase(db, "case-1")?.status).toBe("verifying");
   });
+
+  it("records root_cause_summary and confidence from a proposed_action marker", async () => {
+    const events: TurnStreamEvent[] = [
+      ...modelMessage(
+        "msg-1",
+        '<<CASE_EVENT>>{"phase":"proposed_action","summary":"Roll back to 3839bc0: bisect matched bb83296 to the observed 6.0% error rate.","confidence":"high"}<</CASE_EVENT>>',
+        [{ index: 0, id: "call-1", function: { name: "rollback_deploy", arguments: '{"target_commit_sha":"3839bc0"}' } }],
+      ),
+      { type: "tool.approval_required", id: "evt-1", thread_id: "main", tool_calls: [{ id: "call-1", source_event_id: "msg-1" }] },
+      { type: "turn.done", id: "evt-2", state: { status: "done" } },
+    ];
+    const runner = new SessionRunner(db, new FakeClient(events));
+
+    await runner.startInvestigation("case-1", "sess-1", "investigate");
+
+    const theCase = getCase(db, "case-1");
+    expect(theCase?.confidence).toBe("high");
+    expect(theCase?.root_cause_summary).toBe("Roll back to 3839bc0: bisect matched bb83296 to the observed 6.0% error rate.");
+  });
+
+  it("ignores a proposed_action marker with a malformed confidence value", async () => {
+    const events: TurnStreamEvent[] = [
+      ...modelMessage(
+        "msg-1",
+        '<<CASE_EVENT>>{"phase":"proposed_action","summary":"Roll back to 3839bc0.","confidence":"very high"}<</CASE_EVENT>>',
+      ),
+      { type: "turn.done", id: "evt-1", state: { status: "done" } },
+    ];
+    const runner = new SessionRunner(db, new FakeClient(events));
+
+    await runner.startInvestigation("case-1", "sess-1", "investigate");
+
+    expect(getCase(db, "case-1")?.confidence).toBeNull();
+  });
 });
