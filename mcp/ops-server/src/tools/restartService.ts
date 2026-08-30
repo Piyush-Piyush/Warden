@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const restartServiceInputShape = {
-  project: z.string(),
-  service: z.string(),
-  environment: z.string(),
+  project: z.string().min(1),
+  service: z.string().min(1),
+  environment: z.string().min(1),
 };
 
 const restartServiceInput = z.object(restartServiceInputShape);

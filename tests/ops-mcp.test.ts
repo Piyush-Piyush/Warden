@@ -1,12 +1,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { z } from "zod";
 import { beforeEach, describe, expect, it } from "vitest";
 import { armIncident, getScenarioState, recordRollback, resetScenario } from "../mcp/ops-server/src/scenarioState.js";
 import { getBisectKitHandler } from "../mcp/ops-server/src/tools/getBisectKit.js";
 import { getLogsHandler } from "../mcp/ops-server/src/tools/getLogs.js";
 import { getMetricsHandler } from "../mcp/ops-server/src/tools/getMetrics.js";
 import { listDeploysHandler } from "../mcp/ops-server/src/tools/listDeploys.js";
-import { rollbackDeployHandler } from "../mcp/ops-server/src/tools/rollbackDeploy.js";
+import { rollbackDeployHandler, rollbackDeployInputShape } from "../mcp/ops-server/src/tools/rollbackDeploy.js";
+import { restartServiceInputShape } from "../mcp/ops-server/src/tools/restartService.js";
 
 const PROJECT = "sample-checkout";
 const SERVICE = "checkout-api";
@@ -137,6 +139,37 @@ describe("ops-mcp tool handlers", () => {
       const scenario = getScenarioState(PROJECT, SERVICE);
       expect(scenario.rollback_performed_at).toBe(rollbackResult.rolled_back_at);
       expect(scenario.rolled_back_to_commit_sha).toBe("9f01");
+    });
+
+    it("rejects an empty target_commit_sha at the schema level", () => {
+      const result = z.object(rollbackDeployInputShape).safeParse({
+        project: PROJECT,
+        service: SERVICE,
+        target_commit_sha: "",
+        environment: "production",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("rejects an empty project or service", () => {
+      const missingProject = z.object(rollbackDeployInputShape).safeParse({
+        project: "",
+        service: SERVICE,
+        target_commit_sha: "9f01",
+        environment: "production",
+      });
+      expect(missingProject.success).toBe(false);
+    });
+  });
+
+  describe("restart_service", () => {
+    it("rejects an empty project, service, or environment", () => {
+      const result = z.object(restartServiceInputShape).safeParse({
+        project: PROJECT,
+        service: "",
+        environment: "production",
+      });
+      expect(result.success).toBe(false);
     });
   });
 

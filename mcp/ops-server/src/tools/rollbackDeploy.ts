@@ -2,10 +2,10 @@ import { z } from "zod";
 import { recordRollback } from "../scenarioState.js";
 
 export const rollbackDeployInputShape = {
-  project: z.string(),
-  service: z.string(),
-  target_commit_sha: z.string(),
-  environment: z.string(),
+  project: z.string().min(1),
+  service: z.string().min(1),
+  target_commit_sha: z.string().min(1),
+  environment: z.string().min(1),
 };
 
 const rollbackDeployInput = z.object(rollbackDeployInputShape);
